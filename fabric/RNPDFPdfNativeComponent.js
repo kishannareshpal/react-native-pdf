@@ -10,6 +10,13 @@
  type ChangeEvent = $ReadOnly<{|
    message: ?string,
  |}>;
+
+ type ContentInset = $ReadOnly<{|
+   top?: Float,
+   left?: Float,
+   bottom?: Float,
+   right?: Float,
+ |}>;
  
  export type NativeProps = $ReadOnly<{|
    ...ViewProps,
@@ -32,6 +39,7 @@
    password: ?string,
    onChange: ?BubblingEventHandler<ChangeEvent>,
    singlePage: ?boolean,
+   contentInset: ?ContentInset,
  |}>;
 
  interface NativeCommands {

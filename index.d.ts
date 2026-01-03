@@ -27,6 +27,13 @@ export type Source = {
     method?: string;
 };
 
+export type ContentInset = {
+    top?: number;
+    left?: number;
+    bottom?: number;
+    right?: number;
+}
+
 export interface PdfProps {
     style?: ReactNative.StyleProp<ReactNative.ViewStyle>,
     progressContainerStyle?: ReactNative.StyleProp<ReactNative.ViewStyle>,
@@ -56,6 +63,7 @@ export interface PdfProps {
     fitPolicy?: 0 | 1 | 2,
     trustAllCerts?: boolean,
     singlePage?: boolean,
+    contentInset?: ContentInset,
     onLoadProgress?: (percent: number,) => void,
     onLoadComplete?: (numberOfPages: number, path: string, size: {height: number, width: number}, tableContents?: TableContent[]) => void,
     onPageChanged?: (page: number, numberOfPages: number) => void,

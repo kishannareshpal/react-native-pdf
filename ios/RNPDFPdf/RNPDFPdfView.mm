@@ -176,6 +176,17 @@ using namespace facebook::react;
         [updatedPropNames addObject:@"scrollEnabled"];
     }
 
+    NSMutableDictionary *newContentInsetDict = [NSMutableDictionary new];
+    auto inset = newProps.contentInset;
+    newContentInsetDict[@"top"] = @(static_cast<CGFloat>(inset.top));
+    newContentInsetDict[@"left"] = @(static_cast<CGFloat>(inset.left));
+    newContentInsetDict[@"bottom"] = @(static_cast<CGFloat>(inset.bottom));
+    newContentInsetDict[@"right"] = @(static_cast<CGFloat>(inset.right));
+    if (![_contentInset isEqualToDictionary:newContentInsetDict]) {
+      _contentInset = [newContentInsetDict copy];
+      [updatedPropNames addObject:@"contentInset"];
+    }
+
     [super updateProps:props oldProps:oldProps];
     [self didSetProps:updatedPropNames];
 }
@@ -264,6 +275,7 @@ using namespace facebook::react;
     _showsHorizontalScrollIndicator = YES;
     _showsVerticalScrollIndicator = YES;
     _scrollEnabled = YES;
+    _contentInset = @{};
 
     // init and config PDFView
     _pdfView = [[PDFView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -484,6 +496,19 @@ using namespace facebook::react;
 
         if (_pdfDocument && ([changedProps containsObject:@"path"] || [changedProps containsObject:@"showsHorizontalScrollIndicator"] || [changedProps containsObject:@"showsVerticalScrollIndicator"])) {
             [self setScrollIndicators:self horizontal:_showsHorizontalScrollIndicator vertical:_showsVerticalScrollIndicator depth:0];
+        }
+
+        if (_pdfDocument && ([changedProps containsObject:@"path"] || [changedProps containsObject:@"contentInset"])) {
+            _contentInset = _contentInset ?: @{};
+            CGFloat top = [_contentInset[@"top"] ?: @0 floatValue];
+            CGFloat left = [_contentInset[@"left"] ?: @0 floatValue];
+            CGFloat bottom = [_contentInset[@"bottom"] ?: @0 floatValue];
+            CGFloat right = [_contentInset[@"right"] ?: @0 floatValue];
+
+            UIEdgeInsets insets = UIEdgeInsetsMake(top, left, bottom, right);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self setContentInsetsOnScrollViews:self->_pdfView insets:insets depth:0];
+            });
         }
 
         if (_pdfDocument && ([changedProps containsObject:@"path"] || [changedProps containsObject:@"scrollEnabled"])) {
@@ -913,6 +938,23 @@ using namespace facebook::react;
     
     for (UIView *subview in view.subviews) {
         [self setScrollIndicators:subview horizontal:horizontal vertical:vertical depth:depth + 1];
+    }
+}
+
+- (void)setContentInsetsOnScrollViews:(UIView *)view insets:(UIEdgeInsets)insets depth:(int)depth {
+    // max depth, prevent infinite loop
+    if (depth > 10) {
+        return;
+    }
+    
+    if ([view isKindOfClass:[UIScrollView class]]) {
+        UIScrollView *scrollView = (UIScrollView *)view;
+        scrollView.contentInset = insets;
+        scrollView.scrollIndicatorInsets = insets;
+    }
+    
+    for (UIView *subview in view.subviews) {
+        [self setContentInsetsOnScrollViews:subview insets:insets depth:depth + 1];
     }
 }
 

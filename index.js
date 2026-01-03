@@ -63,6 +63,12 @@ export default class Pdf extends Component {
         onPageSingleTap: PropTypes.func,
         onScaleChanged: PropTypes.func,
         onPressLink: PropTypes.func,
+        contentInset: PropTypes.shape({
+            top: PropTypes.number,
+            left: PropTypes.number,
+            bottom: PropTypes.number,
+            right: PropTypes.number,
+        }),
 
         // Props that are not available in the earlier react native version, added to prevent crashed on android
         accessibilityLabel: PropTypes.string,
